@@ -42,43 +42,66 @@ func NewGraph() *Graph {
 	}
 }
 
-// AddNode adds a node to the graph
-func (g *Graph) AddNode(node string) {
-	g.adj[node] = make([]string, 0)
-}
-
 // AddEdge adds a directed edge from 'from' to 'to'
 func (g *Graph) AddEdge(from, to string) {
 	if _, exists := g.adj[from]; !exists {
 		g.adj[from] = make([]string, 0)
-	} else {
-		g.adj[from] = append(g.adj[from], to)
 	}
+	if _, exists := g.adj[to]; !exists {
+		g.adj[to] = make([]string, 0)
+	}
+	g.adj[from] = append(g.adj[from], to)
+
 }
 
 // Returns the order of visited nodes
 func (g *Graph) BFS(start string) []string {
 	// TODO: Implement BFS
-	// Hint: Use a queue (slice), visited map, and iteration
-	return nil
+	visited := make(map[string]bool, len(g.adj))
+	queue := []string{start}
+	result := make([]string, 0)
+
+	visited[start] = true
+	for len(queue) != 0 {
+		var node = queue[0]
+		queue = queue[1:]
+		result = append(result, node)
+		for _, neighbor := range g.adj[node] {
+			if !visited[neighbor] {
+				visited[neighbor] = true
+				queue = append(queue, neighbor)
+			}
+		}
+	}
+	return result
 }
 
 // DFS performs Depth-First Search starting from 'start'
 // Returns the order of visited nodes
 func (g *Graph) DFS(start string) []string {
 	// TODO: Implement DFS
-	// Hint: Use recursion and a visited map
-	return nil
+	visited := make(map[string]bool, len(g.adj))
+	result := []string{}
+	g.dfsHelper(start, visited, &result)
+	return result
 }
 
 // Helper function for DFS recursion
 func (g *Graph) dfsHelper(node string, visited map[string]bool, result *[]string) {
 	// TODO: Implement recursive DFS helper
+	visited[node] = true
+	*result = append(*result, node)
+	var connectedNodes = g.adj[node]
+	for _, value := range connectedNodes {
+		if !visited[value] {
+			g.dfsHelper(value, visited, result)
+		}
+	}
 }
 
 func main() {
 	fmt.Println("🎮 Challenge 1.1: Graph Traversal")
-	fmt.Println("===================================\n")
+	fmt.Println("===================================")
 
 	// Create a graph
 	graph := NewGraph()
@@ -89,12 +112,6 @@ func main() {
 	//   B   C
 	//  / \   \
 	// D   E   F
-	graph.AddNode("A")
-	graph.AddNode("B")
-	graph.AddNode("C")
-	graph.AddNode("D")
-	graph.AddNode("E")
-	graph.AddNode("F")
 
 	graph.AddEdge("A", "B")
 	graph.AddEdge("A", "C")
