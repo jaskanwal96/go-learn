@@ -42,14 +42,19 @@ type HashTable struct {
 // NewHashTable creates a new hash table with given size
 func NewHashTable(size int) *HashTable {
 	// TODO: Initialize buckets
-	return nil
+	return &HashTable{
+		buckets: make([][]KeyValue, size),
+		size:    size,
+	}
 }
 
 // hash calculates hash value for a key
 func (ht *HashTable) hash(key string) int {
-	// TODO: Implement hash function
-	// Hint: Sum ASCII values and use modulo
-	return 0
+	sum := 0
+	for _, char := range key {
+		sum += int(char)
+	}
+	return sum % ht.size
 }
 
 // Set stores a key-value pair
@@ -59,6 +64,18 @@ func (ht *HashTable) Set(key, value string) {
 	// 2. Find bucket
 	// 3. Check if key exists, update if yes
 	// 4. Otherwise append new KeyValue
+	bucket := ht.hash(key)
+	if len(ht.buckets[bucket]) == 0 {
+		ht.buckets[bucket] = []KeyValue{{Key: key, Value: value}}
+	} else {
+		for index, existingKeyValues := range ht.buckets[bucket] {
+			if key == existingKeyValues.Key {
+				ht.buckets[bucket][index].Value = value
+				return
+			}
+		}
+		ht.buckets[bucket] = append(ht.buckets[bucket], KeyValue{Key: key, Value: value})
+	}
 }
 
 // Get retrieves a value by key
@@ -67,6 +84,15 @@ func (ht *HashTable) Get(key string) (string, bool) {
 	// 1. Calculate hash
 	// 2. Search in bucket
 	// 3. Return value and true if found
+	bucket := ht.hash(key)
+	if len(ht.buckets[bucket]) == 0 {
+		return "", false
+	}
+	for index, kv := range ht.buckets[bucket] {
+		if key == kv.Key {
+			return ht.buckets[bucket][index].Value, true
+		}
+	}
 	return "", false
 }
 
@@ -75,6 +101,20 @@ func (ht *HashTable) Delete(key string) bool {
 	// TODO: Implement Delete
 	// 1. Calculate hash
 	// 2. Find and remove from bucket
+	bucketIndex := ht.hash(key)
+	bucket := ht.buckets[bucketIndex]
+
+	// Find the index of the key
+	for i, kv := range bucket {
+		if kv.Key == key {
+			// Remove element at index i using slicing
+			lastIndex := len(bucket) - 1
+			bucket[i] = bucket[lastIndex]
+			// Truncate slice (remove last element)
+			ht.buckets[bucketIndex] = bucket[:lastIndex]
+			return true
+		}
+	}
 	return false
 }
 
@@ -86,35 +126,52 @@ func (ht *HashTable) Keys() []string {
 
 func main() {
 	fmt.Println("🎮 Challenge 1.2: Hash Table Implementation")
-	fmt.Println("==========================================\n")
+	fmt.Println("==========================================")
 
 	ht := NewHashTable(10)
 
 	// Test Set and Get
+	fmt.Println("Test 1: Set and Get")
 	ht.Set("name", "Alice")
 	ht.Set("age", "25")
 	ht.Set("city", "New York")
 
-	if value, ok := ht.Get("name"); ok {
-		fmt.Printf("Get('name'): %s ✅\n", value)
+	if value, ok := ht.Get("name"); ok && value == "Alice" {
+		fmt.Printf("  Get('name'): %s ✅\n", value)
 	} else {
-		fmt.Println("Get('name'): FAILED ❌")
+		fmt.Printf("  Get('name'): FAILED ❌ (got: %s, ok: %v)\n", value, ok)
 	}
 
-	// Test collision (if hash function causes it)
+	// Test Update existing key
+	fmt.Println("\nTest 2: Update existing key")
+	ht.Set("name", "Sunny") // Update "name" from "Alice" to "Sunny"
+	if value, ok := ht.Get("name"); ok && value == "Sunny" {
+		fmt.Printf("  Get('name') after update: %s ✅\n", value)
+	} else {
+		fmt.Printf("  Update FAILED ❌ (expected: 'Sunny', got: %s)\n", value)
+	}
+
+	// Test Update city
+	fmt.Println("\nTest 3: Update city")
 	ht.Set("city", "San Francisco") // Update existing
-	if value, ok := ht.Get("city"); ok {
-		fmt.Printf("Get('city'): %s ✅\n", value)
+	if value, ok := ht.Get("city"); ok && value == "San Francisco" {
+		fmt.Printf("  Get('city'): %s ✅\n", value)
+	} else {
+		fmt.Printf("  Update FAILED ❌ (expected: 'San Francisco', got: %s)\n", value)
 	}
 
 	// Test Delete
+	fmt.Println("\nTest 4: Delete")
 	if ht.Delete("age") {
-		fmt.Println("Delete('age'): SUCCESS ✅")
-	}
-	if _, ok := ht.Get("age"); !ok {
-		fmt.Println("Get('age') after delete: Not found ✅")
+		fmt.Println("  Delete('age'): SUCCESS ✅")
+		if _, ok := ht.Get("age"); !ok {
+			fmt.Println("  Get('age') after delete: Not found ✅")
+		} else {
+			fmt.Println("  Get('age') after delete: Still exists ❌")
+		}
+	} else {
+		fmt.Println("  Delete('age'): FAILED ❌ (Delete not implemented)")
 	}
 
 	fmt.Println("\n✅ Challenge complete!")
 }
-
