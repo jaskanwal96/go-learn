@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"sync"
+	"time"
 )
 
 // ============================================
@@ -45,7 +47,15 @@ func NewScheduler(workers int) *Scheduler {
 	// 5. Initialize completed to 0
 	// 6. Initialize completedMu (it's a struct, no initialization needed)
 	// 7. Return pointer to Scheduler
-	return nil
+
+	queue := NewPriorityQueue()
+	channel := make(chan Task, workers*2)
+	return &Scheduler{
+		queue:     queue,
+		taskChan:  channel,
+		workers:   workers,
+		completed: 0,
+	}
 }
 
 // AddTask adds a task to the scheduler queue
@@ -55,6 +65,7 @@ func (s *Scheduler) AddTask(task Task) {
 	// Steps:
 	// 1. Call Push method on the priority queue
 	//    Example: s.queue.Push(task)
+	s.queue.Push(task)
 }
 
 // Start begins processing tasks with worker goroutines
@@ -72,6 +83,16 @@ func (s *Scheduler) Start() {
 	//         }
 	//      c. When channel closes, loop exits and defer calls wg.Done()
 	//
+	for i := 0; i < s.workers; i++ {
+		workerID := i + 1 // Worker IDs start from 1
+		s.wg.Add(1)
+		go func(id int) {
+			defer s.wg.Done()
+			for task := range s.taskChan {
+				s.processTask(task, id)
+			}
+		}(workerID)
+	}
 	// Part 2: Start dispatcher goroutine
 	// Start a goroutine that:
 	//   1. Loops while queue is not empty:
@@ -85,50 +106,36 @@ func (s *Scheduler) Start() {
 	//
 	// HINT: Review challenge1's processResults function for the worker pattern
 	// HINT: The dispatcher should run in a separate goroutine
+	go func() {
+		for !s.queue.IsEmpty() {
+			task, ok := s.queue.Pop()
+			if ok {
+				s.taskChan <- task
+			}
+		}
+		close(s.taskChan)
+	}()
 }
 
 // processTask simulates processing a task
-func (s *Scheduler) processTask(task Task) {
-	// TODO: Process a task
-	//
-	// NOTE: You'll need to add these imports at the top:
-	//   import (
-	//       "fmt"
-	//       "sync"
-	//       "time"
-	//   )
-	//
-	// Steps:
-	// 1. Print that task is starting (include priority and name)
-	//    Example: fmt.Printf("🚀 Starting task %d: %s (Priority: %d)\n", ...)
-	// 2. Sleep for task.Duration to simulate work: time.Sleep(task.Duration)
-	// 3. Print that task is completed
-	//    Example: fmt.Printf("✅ Completed task %d: %s\n", ...)
-	// 4. Increment completed counter (with mutex lock):
-	//    s.completedMu.Lock()
-	//    s.completed++
-	//    s.completedMu.Unlock()
+func (s *Scheduler) processTask(task Task, workerID int) {
+	fmt.Printf("👷 Worker %d: 🚀 Starting task %d: %s (Priority: %d)\n", workerID, task.ID, task.Name, task.Priority)
+	time.Sleep(task.Duration)
+	fmt.Printf("👷 Worker %d: ✅ Completed task %d: %s\n", workerID, task.ID, task.Name)
+	s.completedMu.Lock()
+	s.completed++
+	s.completedMu.Unlock()
 }
 
 // Wait waits for all tasks to complete
 func (s *Scheduler) Wait() {
-	// TODO: Wait for all worker goroutines to finish
-	//
-	// Steps:
-	// 1. Call Wait() on the WaitGroup
-	//    Example: s.wg.Wait()
-	//
-	// This will block until all workers have called wg.Done()
+	s.wg.Wait()
 }
 
 // GetCompleted returns the number of completed tasks
 func (s *Scheduler) GetCompleted() int {
-	// TODO: Return completed count (with mutex lock)
-	//
-	// Steps:
-	// 1. Lock the mutex: s.completedMu.Lock()
-	// 2. Get the value: count := s.completed
-	// 3. Unlock the mutex: s.completedMu.Unlock()
-	// 4. Return the count
-	return 0
+	s.completedMu.Lock()
+	count := s.completed
+	s.completedMu.Unlock()
+	return count
 }

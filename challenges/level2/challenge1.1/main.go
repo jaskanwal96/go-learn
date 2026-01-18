@@ -1,5 +1,10 @@
 package main
 
+import (
+	"fmt"
+	"time"
+)
+
 // ============================================
 // 🎯 CHALLENGE 2.1: Concurrent Task Scheduler with Priority Queue
 // ============================================
@@ -38,40 +43,47 @@ package main
 //   - How to send/receive from channels
 
 func main() {
-	// fmt.Println("🎮 Challenge 2.1: Concurrent Task Scheduler with Priority Queue")
-	// fmt.Println("===============================================================")
-	// fmt.Println()
+	fmt.Println("🎮 Challenge 2.1: Concurrent Task Scheduler with Priority Queue")
+	fmt.Println("===============================================================")
+	fmt.Println()
 
-	// // Create scheduler with 3 workers
-	// scheduler := NewScheduler(3)
+	startTime := time.Now()
+	// Create scheduler with 3 workers
+	scheduler := NewScheduler(10)
 
-	// // Add tasks with different priorities
-	// tasks := []Task{
-	// 	{ID: 1, Priority: 5, Name: "Low Priority Task", Duration: 200 * time.Millisecond},
-	// 	{ID: 2, Priority: 1, Name: "High Priority Task", Duration: 150 * time.Millisecond},
-	// 	{ID: 3, Priority: 3, Name: "Medium Priority Task", Duration: 100 * time.Millisecond},
-	// 	{ID: 4, Priority: 2, Name: "Very High Priority Task", Duration: 120 * time.Millisecond},
-	// 	{ID: 5, Priority: 4, Name: "Low-Medium Priority Task", Duration: 180 * time.Millisecond},
-	// 	{ID: 6, Priority: 1, Name: "Another High Priority Task", Duration: 130 * time.Millisecond},
-	// }
+	// Add tasks with different priorities
+	tasks := []Task{
+		{ID: 1, Priority: 5, Name: "Low Priority Task", Duration: 200 * time.Millisecond},
+		{ID: 2, Priority: 1, Name: "High Priority Task", Duration: 150 * time.Millisecond},
+		{ID: 3, Priority: 3, Name: "Medium Priority Task", Duration: 100 * time.Millisecond},
+		{ID: 4, Priority: 2, Name: "Very High Priority Task", Duration: 120 * time.Millisecond},
+		{ID: 5, Priority: 4, Name: "Low-Medium Priority Task", Duration: 180 * time.Millisecond},
+		{ID: 6, Priority: 1, Name: "Another High Priority Task", Duration: 130 * time.Millisecond},
+		{ID: 7, Priority: 1, Name: "Another High Priority Task", Duration: 130 * time.Millisecond},
+		{ID: 8, Priority: 5, Name: "Another High Priority Task", Duration: 130 * time.Millisecond},
+		{ID: 9, Priority: 6, Name: "Another High Priority Task", Duration: 130 * time.Millisecond},
+		{ID: 10, Priority: 7, Name: "Another High Priority Task", Duration: 130 * time.Millisecond},
+		{ID: 11, Priority: 8, Name: "Another High Priority Task", Duration: 130 * time.Millisecond},
+		{ID: 12, Priority: 9, Name: "Another High Priority Task", Duration: 130 * time.Millisecond},
+	}
 
-	// fmt.Println("Adding tasks to scheduler...")
-	// for _, task := range tasks {
-	// 	scheduler.AddTask(task)
-	// 	fmt.Printf("  Added: %s (Priority: %d)\n", task.Name, task.Priority)
-	// }
+	fmt.Println("Adding tasks to scheduler...")
+	for _, task := range tasks {
+		scheduler.AddTask(task)
+		fmt.Printf("  Added: %s (Priority: %d)\n", task.Name, task.Priority)
+	}
 
-	// fmt.Println("\nStarting scheduler...")
-	// scheduler.Start()
+	fmt.Println("\nStarting scheduler...")
+	scheduler.Start()
 
-	// fmt.Println("\nWaiting for all tasks to complete...")
-	// scheduler.Wait()
+	fmt.Println("\nWaiting for all tasks to complete...")
+	scheduler.Wait()
 
-	// fmt.Printf("\n✅ All tasks completed! Total: %d\n", scheduler.GetCompleted())
-	// fmt.Println("\nExpected behavior:")
-	// fmt.Println("- Tasks with Priority 1 should complete first")
-	// fmt.Println("- Tasks with Priority 2 should complete next")
-	// fmt.Println("- And so on...")
-	// fmt.Println("- Multiple tasks can run concurrently (3 workers)")
-	TestPQ()
+	fmt.Printf("\n✅ All tasks completed! Total: %d\n", scheduler.GetCompleted())
+	fmt.Print("Time Took:", time.Since(startTime))
+	fmt.Println("\nExpected behavior:")
+	fmt.Println("- Tasks with Priority 1 should complete first")
+	fmt.Println("- Tasks with Priority 2 should complete next")
+	fmt.Println("- And so on...")
+	fmt.Println("- Multiple tasks can run concurrently (3 workers)")
 }
