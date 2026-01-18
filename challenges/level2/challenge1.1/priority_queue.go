@@ -105,15 +105,25 @@ func (pq *PriorityQueue) Pop() (Task, bool) {
 	left_child_index := 2*parent_index + 1
 	right_child_index := 2*parent_index + 2
 
-	for left_child_index < len(pq.tasks) && pq.tasks[left_child_index].Priority < pq.tasks[parent_index].Priority ||
-		right_child_index < len(pq.tasks) && pq.tasks[right_child_index].Priority < pq.tasks[parent_index].Priority {
-		smaller_index := 0
-		if pq.tasks[left_child_index].Priority < pq.tasks[right_child_index].Priority {
-			smaller_index = left_child_index
-		} else {
+	for left_child_index < len(pq.tasks) {
+		smaller_index := left_child_index
+
+		// if right child exists and is smaller, use it
+		if right_child_index < len(pq.tasks) &&
+			pq.tasks[right_child_index].Priority < pq.tasks[left_child_index].Priority {
 			smaller_index = right_child_index
 		}
-		pq.tasks[smaller_index], pq.tasks[parent_index] = pq.tasks[parent_index], pq.tasks[smaller_index]
+
+		// if heap property is satisfied, stop
+		if pq.tasks[parent_index].Priority <= pq.tasks[smaller_index].Priority {
+			break
+		}
+
+		// swap parent with smaller child
+		pq.tasks[parent_index], pq.tasks[smaller_index] =
+			pq.tasks[smaller_index], pq.tasks[parent_index]
+
+		// move down
 		parent_index = smaller_index
 		left_child_index = 2*parent_index + 1
 		right_child_index = 2*parent_index + 2
