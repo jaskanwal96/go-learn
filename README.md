@@ -6,12 +6,14 @@ A progressive, challenge-based learning system for mastering Go programming.
 
 ### 🟢 Level 1: Fundamentals
 Master the basics: structs, methods, interfaces, slices, maps
-- Challenge 1.1: Graph Traversal (BFS/DFS)
-- Challenge 1.2: Hash Table Implementation
+- Challenge 1.1: Reconstruct Itinerary (LeetCode 332)
 - Challenge 1.3: Interfaces & Polymorphism
 
 ### 🟡 Level 2: Concurrency
 Learn goroutines, channels, mutexes, and concurrent patterns
+- Challenge 2.1: Concurrent Task Scheduler with Priority Queue
+- Challenge 2.2: RPC using Go
+- Challenge 2.3: Concurrent URL Fetcher with Rate Limiting
 
 ### 🔵 Level 3: APIs & HTTP
 Build HTTP clients, REST APIs, JSON handling, and middleware
