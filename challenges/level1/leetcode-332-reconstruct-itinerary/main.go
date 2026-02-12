@@ -1,8 +1,6 @@
-package main
-
 import (
 	"fmt"
-	"sort"
+	"slices"
 )
 
 type Journey struct {
@@ -20,14 +18,13 @@ func (j *Journey) AddDestination(from string, to string) {
 }
 
 func (j *Journey) buildItinerary(airport string, itinerary *[]string) {
-	airports := j.adj[airport]
-	for len(j.adj[airport]) > 0 {
-		currentAirport := airports[0]
-		j.adj[airport] = j.adj[airport][1:]
-		j.buildItinerary(currentAirport, itinerary)
-	}
-	*itinerary = append(*itinerary, airport)
-
+	if airports, ok := j.adj[airport]; !ok || len(airports) == 0 {
+        *itinerary = append(*itinerary, airport)
+        return
+    }
+    currentAirport := airports[0]
+    j.adj[airport] = j.adj[airport][1:]
+    j.buildItinerary(currentAirport, itinerary)
 }
 
 func findItinerary(tickets [][]string) []string {
@@ -36,7 +33,7 @@ func findItinerary(tickets [][]string) []string {
 		journey.AddDestination(ticket[0], ticket[1])
 	}
 	for k := range journey.adj {
-		sort.Strings(journey.adj[k])
+        slices.SortFunc(journey.adj[k], func(i, j string) int { return -strings.Compare(i, j)})
 	}
 	itinerary := []string{}
 	journey.buildItinerary("JFK", &itinerary)
@@ -44,11 +41,4 @@ func findItinerary(tickets [][]string) []string {
 		itinerary[i], itinerary[j] = itinerary[j], itinerary[i]
 	}
 	return itinerary
-}
-
-func main() {
-	tickets := [][]string{
-		{"JFK", "SFO"}, {"JFK", "ATL"}, {"SFO", "ATL"}, {"ATL", "JFK"}, {"ATL", "SFO"},
-	}
-	fmt.Printf("%v", findItinerary(tickets))
 }
